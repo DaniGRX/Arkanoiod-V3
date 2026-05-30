@@ -15,6 +15,10 @@ public class Block : MonoBehaviour
     [SerializeField] Animator breakAnimator;
     [SerializeField] float destroyDelay = 0.25f;
 
+    [Header("Power-Ups")]
+    [SerializeField] GameObject[] powerUpPrefabs; // arrastra los 3 prefabs
+    [SerializeField] float powerUpDropChance = 0.3f; // 30% de probabilidad
+
     // ── Estado interno ─────────────────────────────────────
     bool isBreaking = false;
     SpriteRenderer sr;
@@ -44,17 +48,15 @@ public class Block : MonoBehaviour
         {
             isBreaking = true;
 
-            // Suma puntos cuando se destruye definitivamente
             if (gameManager != null)
                 gameManager.AddScore(points);
 
-            // Ocultamos el sprite principal del bloque
-            // La animación del hijo se encarga de la rotura
+            TrySpawnPowerUp(); // ← AÑADE ESTA LÍNEA
+
             sr.enabled = false;
 
             if (breakAnimator != null)
             {
-                // Activamos la animación en el objeto hijo
                 breakAnimator.SetTrigger("Break");
                 StartCoroutine(DestroyAfterAnimation());
             }
@@ -87,5 +89,17 @@ public class Block : MonoBehaviour
     {
         yield return new WaitForSeconds(destroyDelay);
         Destroy(gameObject);
+    }
+    void TrySpawnPowerUp()
+    {
+        if (powerUpPrefabs == null || powerUpPrefabs.Length == 0) return;
+
+        // Comprobamos probabilidad
+        if (Random.value > powerUpDropChance) return;
+
+        // Elegimos un power-up aleatorio
+        int index = Random.Range(0, powerUpPrefabs.Length);
+        if (powerUpPrefabs[index] != null)
+            Instantiate(powerUpPrefabs[index], transform.position, Quaternion.identity);
     }
 }

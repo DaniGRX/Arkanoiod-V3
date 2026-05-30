@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Paddle
+  - DeathZone
   layers:
   - Default
   - TransparentFX

@@ -160,6 +160,11 @@ MonoBehaviour:
   - {fileID: 7330318331233092927, guid: 692b99227f0328c4da8202143fd9ca5b, type: 3}
   breakAnimator: {fileID: 1063075855919869714}
   destroyDelay: 0.5
+  powerUpPrefabs:
+  - {fileID: 542430790870064221, guid: aad84705deaa8bc40bcc63e72cecd3c1, type: 3}
+  - {fileID: 5144355366792085319, guid: 7ad9ed815178b884bb73fc8140bd0921, type: 3}
+  - {fileID: 8984061841040420455, guid: e4a9939e7062a1f4998bacff5b54ea1f, type: 3}
+  powerUpDropChance: 0.3
 --- !u!1 &8006660887138886205
 GameObject:
   m_ObjectHideFlags: 0

@@ -309,6 +309,8 @@ public class GameManager : MonoBehaviour
     {
         // Evito perder vidas fuera de la partida
         if (CurrentState != GameState.Playing) return;
+        
+        if (CountActiveBalls() > 1) return;
 
         // Resto una vida
         currentLives--;
@@ -331,8 +333,25 @@ public class GameManager : MonoBehaviour
 
     void ResetBall()
     {
-        // Coloco la bola otra vez en el punto inicial
+        // Destruimos cualquier bola extra que pueda haber
+        BallController[] balls = FindObjectsByType<BallController>(FindObjectsSortMode.None);
+        foreach (BallController b in balls)
+        {
+            if (b != ball) // conservamos la bola principal
+                Destroy(b.gameObject);
+        }
+
+        // Reseteamos la bola principal
         ball.ResetBall(ballSpawn.position);
+    }
+
+    // ── Contar bolas en juego ──────────────────────────────
+    int CountActiveBalls()
+    // Busco todas las instancias activas de BallController
+    // que existen actualmente en la escena
+    // y devuelvo cuántas he encontrado
+    {
+        return FindObjectsByType<BallController>(FindObjectsSortMode.None).Length;
     }
 
     // ── Actualizar UI ──────────────────────────────────────
