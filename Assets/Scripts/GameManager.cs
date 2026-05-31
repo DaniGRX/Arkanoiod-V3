@@ -32,6 +32,13 @@ public class GameManager : MonoBehaviour
     int currentLives;
     int blocksRemaining;
 
+    // ── Combo ──────────────────────────────────────────────
+    [Header("Combo")]                                        // ← NUEVO
+    [SerializeField] public int comboMultiplier = 1;        // ← NUEVO
+    [SerializeField] int maxCombo = 10;                     // ← NUEVO
+    [SerializeField] TMP_Text comboText;                    // ← NUEVO
+    public int ComboMultiplier => comboMultiplier;          // ← NUEVO
+
     [Header("Audio")]
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioSource musicSource;
@@ -42,6 +49,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip musicVictory;
     [SerializeField] AudioClip musicPlaying;
     [SerializeField] AudioClip musicPause;
+
+    // ── Awake ──────────────────────────────────────────────
+    void Awake()
+    {
+        if (ball == null)
+        {
+            GameObject mainBallObj = GameObject.FindWithTag("MainBall");
+            if (mainBallObj != null)
+                ball = mainBallObj.GetComponent<BallController>();
+        }
+    }
 
     // ── Inicio ─────────────────────────────────────────────
     void Start()
@@ -153,8 +171,10 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         currentLives = maxLives;
+        comboMultiplier = 1;    // ← NUEVO
         UpdateScoreUI();
         UpdateLivesUI();
+        UpdateComboUI();        // ← NUEVO
 
         blockSpawner.Spawn();
         blocksRemaining = blockSpawner.GetTotalBlocks();
@@ -172,7 +192,14 @@ public class GameManager : MonoBehaviour
     // ── Puntuación ─────────────────────────────────────────
     public void AddScore(int amount)
     {
-        score += amount;
+        // Multiplicamos los puntos por el combo actual
+        int finalPoints = amount * comboMultiplier;         // ← NUEVO
+        score += finalPoints;                               // ← NUEVO
+
+        // Limitamos el combo al máximo configurado
+        comboMultiplier = Mathf.Clamp(                     // ← NUEVO
+            comboMultiplier, 1, maxCombo);                 // ← NUEVO
+
         UpdateScoreUI();
         blocksRemaining--;
         CheckVictory();
@@ -184,12 +211,24 @@ public class GameManager : MonoBehaviour
             SetState(GameState.Victory);
     }
 
+    // ── Combo ──────────────────────────────────────────────
+    public void ResetCombo()                               // ← NUEVO
+    {                                                      // ← NUEVO
+        comboMultiplier = 1;                               // ← NUEVO
+        UpdateComboUI();                                   // ← NUEVO
+    }                                                      // ← NUEVO
+
+    public void UpdateComboUI()                            // ← NUEVO
+    {                                                      // ← NUEVO
+        if (comboText != null)                             // ← NUEVO
+            comboText.text = "Combo X" + comboMultiplier; // ← NUEVO
+    }                                                      // ← NUEVO
+
     // ── Vidas ──────────────────────────────────────────────
     public void LoseLife()
     {
         if (CurrentState != GameState.Playing) return;
 
-        // Seguridad extra: no restamos vida si hay más de una bola
         if (CountActiveBalls() > 1) return;
 
         currentLives--;
@@ -207,7 +246,6 @@ public class GameManager : MonoBehaviour
     // ── Resetear bola ──────────────────────────────────────
     void ResetBall()
     {
-        // Destruimos cualquier bola extra que pueda haber
         BallController[] balls = FindObjectsByType<BallController>(FindObjectsSortMode.None);
         foreach (BallController b in balls)
         {
@@ -215,7 +253,6 @@ public class GameManager : MonoBehaviour
                 Destroy(b.gameObject);
         }
 
-        // Si la referencia se ha perdido la buscamos por tag
         if (ball == null)
         {
             GameObject mainBallObj = GameObject.FindWithTag("MainBall");
@@ -223,7 +260,6 @@ public class GameManager : MonoBehaviour
                 ball = mainBallObj.GetComponent<BallController>();
         }
 
-        // Comprobamos que la bola principal sigue existiendo
         if (ball == null)
         {
             Debug.LogWarning("No se encontró la bola principal.");
@@ -257,16 +293,5 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Saliendo del juego...");
         Application.Quit();
-    }
-
-    void Awake()
-    {
-        // Si ball no está asignada en el Inspector la buscamos por tag
-        if (ball == null)
-        {
-            GameObject mainBallObj = GameObject.FindWithTag("MainBall");
-            if (mainBallObj != null)
-                ball = mainBallObj.GetComponent<BallController>();
-        }
     }
 }

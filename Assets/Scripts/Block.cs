@@ -51,8 +51,11 @@ public class Block : MonoBehaviour
             if (gameManager != null)
                 gameManager.AddScore(points);
 
-            TrySpawnPowerUp(); // ← AÑADE ESTA LÍNEA
+            // ── NUEVO: aumenta el combo al destruir bloque ──
+            gameManager.comboMultiplier++;
+            gameManager.UpdateComboUI();
 
+            TrySpawnPowerUp();
             sr.enabled = false;
 
             if (breakAnimator != null)
@@ -67,8 +70,11 @@ public class Block : MonoBehaviour
         }
         else
         {
-            // Actualiza sprite de daño
             UpdateDamageSprite();
+
+            // ── NUEVO: aumenta el combo aunque no se destruya
+            gameManager.comboMultiplier++;
+            gameManager.UpdateComboUI();
         }
     }
 
