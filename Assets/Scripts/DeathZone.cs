@@ -1,35 +1,44 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 public class DeathZone : MonoBehaviour
 {
-    // Referencia al GameManager para poder acceder
-    // al sistema de vidas y control de la partida
     GameManager gm;
+    bool isProcessing = false; // ‚Üê evita procesar dos colisiones a la vez
 
     void Awake()
     {
-        // Busco autom·ticamente el GameManager
-        // existente en la escena al iniciar el objeto
         gm = FindFirstObjectByType<GameManager>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Compruebo si el objeto que ha entrado
-        // en la zona de muerte es una pelota
         BallController ball = other.GetComponent<BallController>();
 
-        if (ball != null)
+        if (ball == null) return;
+
+        // Contamos las bolas ANTES de destruir ninguna
+        BallController[] balls = FindObjectsByType<BallController>(FindObjectsSortMode.None);
+
+        if (balls.Length > 1)
         {
-            // Siempre avisamos al GameManager
-            // …l decide si restar vida o no seg˙n las bolas restantes
+            // Hay m√°s de una bola: destruimos esta sin avisar al GameManager
+            Destroy(other.gameObject);
+        }
+        else
+        {
+            // Es la √∫ltima bola pero evitamos procesarla dos veces
+            if (isProcessing) return;
+            isProcessing = true;
+
             gm.LoseLife();
 
-            // Si hay m·s de una bola simplemente destruimos esta
-            // sin resetear ni restar vida (lo gestiona GameManager)
-            BallController[] balls = FindObjectsByType<BallController>(FindObjectsSortMode.None);
-            if (balls.Length > 1)
-                Destroy(other.gameObject);
+            // Reseteamos el flag tras un frame
+            Invoke(nameof(ResetProcessing), 0.1f);
         }
+    }
+
+    void ResetProcessing()
+    {
+        isProcessing = false;
     }
 }

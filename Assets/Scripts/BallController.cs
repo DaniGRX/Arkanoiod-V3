@@ -83,6 +83,22 @@ public class BallController : MonoBehaviour
         }
     }
 
+    // ── Corrección de velocidad ────────────────────────────
+    void FixedUpdate()
+    {
+        // Si la bola está en movimiento corregimos su velocidad
+        if (!isAttached && rb.simulated)
+        {
+            float currentSpeed = rb.linearVelocity.magnitude;
+
+            // Solo corregimos si hay una diferencia notable
+            if (Mathf.Abs(currentSpeed - initialSpeed) > 0.1f)
+            {
+                rb.linearVelocity = rb.linearVelocity.normalized * initialSpeed;
+            }
+        }
+    }
+
     // ── Lanzamiento ────────────────────────────────────────
 
     public void Launch()
